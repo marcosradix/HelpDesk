@@ -1,6 +1,6 @@
 package br.com.workmade.helpdesk.HelpDesk.entity;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Transient;
@@ -15,7 +15,7 @@ public class Ticket extends EntityHeaderUtil{
 	@DBRef(lazy= true)
 	private User user;
 
-	private LocalDate date; 
+	private Date date; 
 	
 	private String titulo;
 	
@@ -43,11 +43,11 @@ public class Ticket extends EntityHeaderUtil{
 		this.user = user;
 	}
 
-	public LocalDate getDate() {
+	public Date getDate() {
 		return date;
 	}
 
-	public void setDate(LocalDate date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
 

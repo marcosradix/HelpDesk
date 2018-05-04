@@ -1,4 +1,4 @@
-package br.com.workmade.helpdesk.HelpDesk.security.controller;
+package br.com.workmade.helpdesk.HelpDesk.controller;
 
 import javax.servlet.http.HttpServletRequest;
 

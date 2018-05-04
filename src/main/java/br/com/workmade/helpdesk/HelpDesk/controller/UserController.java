@@ -1,7 +1,5 @@
 package br.com.workmade.helpdesk.HelpDesk.controller;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,13 +140,6 @@ public class UserController {
 	}
 
 	
-	@GetMapping
-	@PreAuthorize("hasAnyRole('ADMIN')")
-	public List<User> findAllUsers(){
-		List<User> users = userService.findAllUsers();
-		return users;
-		
-	}
 }
 
 
