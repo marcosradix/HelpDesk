@@ -1,6 +1,9 @@
 package br.com.workmade.helpdesk.HelpDesk.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.workmade.helpdesk.HelpDesk.security.jwt.JwtTokenUtil;
 import br.com.workmade.helpdesk.HelpDesk.service.TicketService;
 import br.com.workmade.helpdesk.HelpDesk.service.UserService;
+import br.com.workmade.helpdesk.HelpDesk.entity.ChangeStatus;
 import br.com.workmade.helpdesk.HelpDesk.entity.Ticket;
 import br.com.workmade.helpdesk.HelpDesk.entity.User;
 import br.com.workmade.helpdesk.HelpDesk.enums.StatusEnum;
@@ -40,7 +47,7 @@ public class TicketController {
 	private UserService userService;
 	
 	@PostMapping
-	@PreAuthorize("hasAnyRole('CUSTOMER')")
+	@PreAuthorize("hasAnyRole('CLIENT')")
 	public ResponseEntity<Response<Ticket>> createORUpdate(HttpServletRequest request, @RequestBody Ticket ticket,
 			BindingResult result){
 		Response<Ticket> response = new Response<>();
@@ -66,7 +73,7 @@ public class TicketController {
 	}
 	
 	@PutMapping
-	@PreAuthorize("hasAnyRole('CUSTOMER')")
+	@PreAuthorize("hasAnyRole('CLIENT')")
 	public ResponseEntity<Response<Ticket>> update(HttpServletRequest request, @RequestBody Ticket ticket,
 			BindingResult result){
 		Response<Ticket> response = new Response<>();
@@ -93,6 +100,42 @@ public class TicketController {
 		
 		return ResponseEntity.ok(response);
 		
+	}
+	
+	@GetMapping("{id}")
+	@PreAuthorize("hasAnyRole('CLIENT','TECHNICIAN')")
+	public ResponseEntity<Response<Ticket>> findById(@PathVariable("id") String id){
+		Response<Ticket> response = new Response<>();
+		Ticket ticket = ticketService.findById(id);
+		if(ticket == null){
+			response.getErros().add(String.format("Registro não encontrado com id: %s", id));
+			return ResponseEntity.badRequest().body(response);
+		}
+		
+		List<ChangeStatus> changes = new ArrayList<>();
+		Iterable<ChangeStatus> chagesCurrent = ticketService.listChangeStatus(ticket.getId());
+		
+		for (Iterator<ChangeStatus> iterator = chagesCurrent.iterator(); iterator.hasNext();) {
+			ChangeStatus changeStatus = (ChangeStatus) iterator.next();
+			changeStatus.setTicket(null);
+			changes.add(changeStatus);
+		}
+		ticket.setChanges(changes);
+		response.setData(ticket);
+		return ResponseEntity.ok(response);
+	
+	}
+	@DeleteMapping("{id}")
+	@PreAuthorize("hasAnyRole('CLIENT')")
+	public ResponseEntity<Response<String>> delete(@PathVariable("id") String id){
+		Response<String> response = new Response<>();
+		Ticket ticket = ticketService.findById(id);
+		if(ticket == null){
+			response.getErros().add(String.format("Registro não encontrado com id: %s", id));
+			return ResponseEntity.badRequest().body(response);
+		}
+		ticketService.delete(id);
+		return ResponseEntity.ok(new Response<String>());
 	}
 	
 	private void validateUpdateTicket(Ticket ticket, BindingResult result) {

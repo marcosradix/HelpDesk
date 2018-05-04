@@ -42,8 +42,7 @@ public class AuthenticationRestController {
 		final Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
 						authenticationRequest.getEmail(),
-						authenticationRequest.getPassword()
-						) );
+						authenticationRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
 		final String token = jwtTokenUtil.generateToken(userDetails);
@@ -59,7 +58,7 @@ public class AuthenticationRestController {
 		String token = request.getHeader("Authorization");
 		String username = jwtTokenUtil.getUsernameFromToken(token);
 		final User user = userService.findByEmail(username);
-		
+		user.setPassword(null);
 		if(jwtTokenUtil.canTokenBeRefreshed(token)){
 			String refreshToken = jwtTokenUtil.refreshToken(token);
 			return ResponseEntity.ok(new CurrentUser(refreshToken, user));
